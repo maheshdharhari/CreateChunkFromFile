@@ -70,7 +70,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(61, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "&Chunk Size";
+            this.label2.Text = "Chunk &Size";
             // 
             // textBox2
             // 
@@ -85,7 +85,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 6;
-            this.button3.Text = "&Search";
+            this.button3.Text = "&Create";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -106,7 +106,7 @@
             this.Controls.Add(this.label1);
             this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "Search Item";
+            this.Text = "Create Chunk";
             this.ResumeLayout(false);
             this.PerformLayout();
 
