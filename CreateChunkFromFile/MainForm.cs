@@ -117,7 +117,7 @@ namespace SearchFromReport
 
             if (!File.Exists(excelFilePath))
                 return;
-            string fileNamingConvention = "Set A";
+            string fileNamingConvention = textBox3.Text.Trim();
             if (Path.GetExtension(excelFilePath) == ".xlsx")
             {
                 var idFromFile = new List<string>();
