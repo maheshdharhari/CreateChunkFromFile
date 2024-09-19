@@ -1,8 +1,6 @@
 # CreateChunkFromFile
 ![image](https://github.com/maheshdharhari/CreateChunkFromFile/assets/7856074/11250770-d332-4297-8117-96d72d102904)
 
-# CreateChunkFromFile
-
 ## Overview
 
 `CreateChunkFromFile` is a Windows Forms application that processes CSV and Excel files to extract data and divide large datasets into smaller CSV files. This tool is useful for managing and breaking down large Excel or CSV reports based on a predefined limit.
