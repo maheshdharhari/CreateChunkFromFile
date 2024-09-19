@@ -26,11 +26,11 @@
 1. **Select a File**  
    Click the "Browse" button to select a CSV or Excel (`.xlsx`) report file.
 
-2. **Set the Row Limit**  
+2. **Set the Chunk Size**  
    Enter the number of rows to include in each split CSV file (e.g., `1000`).
 
 3. **Start the Process**  
-   Click the "Start" button to begin processing and splitting the file. The application will run the file processing in the background to avoid freezing the user interface.
+   Click the "Create" button to begin processing and splitting the file. The application will run the file processing in the background to avoid freezing the user interface.
 
 4. **Check Results**  
    After processing, the generated CSV files will be named according to the user-defined naming convention and will be saved in the same directory.
@@ -53,8 +53,8 @@
 ## Example Usage
 
 1. Click "Browse" to select a report file (`.csv` or `.xlsx`).
-2. Set the row limit, e.g., `1000`.
-3. Click "Start" to process and split the file.
+2. Set the Chunk Size, e.g., `1000`.
+3. Click "Create" to process and split the file.
 4. The program will output multiple CSV files, each containing the specified number of rows.
 
 ## Cleanup
