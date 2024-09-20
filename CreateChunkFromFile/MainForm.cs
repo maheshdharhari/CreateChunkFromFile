@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -15,174 +15,183 @@ namespace SearchFromReport
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonBrowse_Click(object sender, EventArgs e)
         {
             var openFileDialog1 = new OpenFileDialog
             {
                 Title = @"Browse Report File",
-
                 CheckFileExists = true,
                 CheckPathExists = true,
-
                 DefaultExt = "csv",
-                Filter = @"csv Files (*.csv)|*.csv",
-                FilterIndex = 2,
+                Filter = @"csv Files (*.csv)|*.csv|Excel Files (*.xlsx)|*.xlsx",
+                FilterIndex = 1,
                 RestoreDirectory = true,
-
                 ReadOnlyChecked = true,
                 ShowReadOnly = true
             };
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                textBox1.Text = openFileDialog1.FileName;
+                textBoxFilePath.Text = openFileDialog1.FileName;
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private async void buttonCreate_Click(object sender, EventArgs e)
         {
-            backgroundWorker1.RunWorkerAsync();
+            try
+            {
+                if (string.IsNullOrWhiteSpace(textBoxFilePath.Text) || !File.Exists(textBoxFilePath.Text))
+                {
+                    MessageBox.Show(@"Please select a valid file.");
+                    return;
+                }
+
+                await Task.Run(() => ProcessFile(textBoxFilePath.Text, int.Parse(textBoxChunkSize.Text), textBoxNameConvention.Text));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($@"Error occurred: {ex.Message}");
+            }
         }
 
-
-        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        private static void ProcessFile(string filePath, int chunkSize, string fileNamingConvention)
         {
-            var excelFilePath = textBox1.Text;
-            var limitToDivideCsv = int.Parse(textBox2.Text.Trim());
+            if (Path.GetExtension(filePath).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                ProcessExcelFile(filePath, chunkSize, fileNamingConvention);
+            }
+            else if (Path.GetExtension(filePath).Equals(".csv", StringComparison.OrdinalIgnoreCase))
+            {
+                ProcessCsvFile(filePath, chunkSize, fileNamingConvention);
+            }
+            else
+            {
+                throw new NotSupportedException("File type not supported. Please select a CSV or Excel file.");
+            }
+        }
 
+        private static void ProcessExcelFile(string excelFilePath, int chunkSize, string fileNamingConvention)
+        {
+            Excel.Application xlApp = null;
+            Excel.Workbook xlWorkbook = null;
+            Excel.Worksheet xlWorksheet = null;
+            Excel.Range xlRange = null;
 
-            if (!File.Exists(excelFilePath))
-                return;
-            var fileNamingConvention = textBox3.Text.Trim();
-            if (Path.GetExtension(excelFilePath) == ".xlsx")
+            try
             {
                 var idFromFile = new List<string>();
-                //Create COM Objects. Create a COM object for everything that is referenced
-                var xlApp = new Excel.Application();
-                var xlWorkbook = xlApp.Workbooks.Open(excelFilePath);
-                var xlWorksheet = xlWorkbook.Sheets[1];
-                Excel.Range xlRange = xlWorksheet.UsedRange;
+                xlApp = new Excel.Application();
+                xlWorkbook = xlApp.Workbooks.Open(excelFilePath);
+                xlWorksheet = xlWorkbook.Sheets[1];
+                xlRange = xlWorksheet.UsedRange;
 
                 var rowCount = xlRange.Rows.Count;
-                //iterate over the rows and columns and print to the console as it appears in the file
-                //excel is not zero based!!
-                string fileName;
                 var fileIncremental = 0;
-                string fileExtenstion;
-                string stringValue;
-                string newFileWithExtension;
+
                 for (var i = 1; i <= rowCount; i++)
                 {
-                    var s = xlRange.Cells[i, 1].Value2.ToString();
+                    var s = xlRange.Cells[i, 1]?.Value2?.ToString();
+                    if (string.IsNullOrEmpty(s)) continue;
+
                     idFromFile.Add(s);
-                    if (idFromFile.Count != limitToDivideCsv) continue;
-                    fileIncremental++;
-                    fileName = fileNamingConvention + fileIncremental;
-                    fileExtenstion = ".csv";
-                    newFileWithExtension = fileName + fileExtenstion;
-                    stringValue = string.Join(Environment.NewLine, idFromFile.ToArray());
-                    if (File.Exists(newFileWithExtension))
-                        File.Delete(newFileWithExtension);
-                    using (var sw = new StreamWriter(newFileWithExtension))
+                    if (idFromFile.Count == chunkSize)
                     {
-                        sw.WriteLine(stringValue);
+                        fileIncremental++;
+                        CreateCsvFile(idFromFile, fileNamingConvention, fileIncremental, chunkSize);
+                        idFromFile.Clear();
                     }
-
-                    idFromFile = new List<string> { "DataID" };
                 }
 
-                fileIncremental++;
-                fileName = fileNamingConvention + fileIncremental;
-                fileExtenstion = ".csv";
-                newFileWithExtension = fileName + fileExtenstion;
-                stringValue = string.Join(Environment.NewLine, idFromFile.ToArray());
-
-                using (var sw = new StreamWriter(newFileWithExtension))
+                // Write the remaining data if any
+                if (idFromFile.Count > 0)
                 {
-                    sw.WriteLine(stringValue);
+                    fileIncremental++;
+                    CreateCsvFile(idFromFile, fileNamingConvention, fileIncremental, chunkSize);
                 }
-
-                //cleanup
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                //rule of thumb for releasing com objects:
-                //  never use two dots, all COM objects must be referenced and released individually
-                //  ex: [something].[something].[something] is bad
-
-                //release com objects to fully kill excel process from running in the background
-                Marshal.ReleaseComObject(xlRange);
-                Marshal.ReleaseComObject(xlWorksheet);
-
-                //close and release
-                xlWorkbook.Close();
-                Marshal.ReleaseComObject(xlWorkbook);
-
-                //quit and release
-                xlApp.Quit();
-                Marshal.ReleaseComObject(xlApp);
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($@"Error processing Excel file: {ex.Message}");
+            }
+            finally
+            {
+                CleanupExcelResources(xlApp, xlWorkbook, xlWorksheet, xlRange);
+            }
+        }
 
-            if (Path.GetExtension(excelFilePath).ToLower() == ".csv")
+        private static void ProcessCsvFile(string csvFilePath, int chunkSize, string fileNamingConvention)
+        {
+            try
             {
                 var idFromFile = new List<string>();
-
-                //iterate over the rows and columns and print to the console as it appears in the file
-                //excel is not zero based!!
-                string fileName;
                 var fileIncremental = 0;
-                string stringValue;
-                string newFileWithExtension;
-                string fileExtenstion;
 
-                using (var reader = new StreamReader(excelFilePath))
+                using (var reader = new StreamReader(csvFilePath))
                 {
                     while (!reader.EndOfStream)
                     {
+                        var line = reader.ReadLine();
+                        var values = line?.Split(',');
+                        if (values == null || values.Length == 0) continue;
+
+                        idFromFile.Add(values[0]);
+                        if (idFromFile.Count == chunkSize)
                         {
-                            var line = reader.ReadLine();
-                            var values = line?.Split(',');
-                            if (values != null)
-                            {
-                                var s = values.FirstOrDefault();
-                                idFromFile.Add(s);
-                            }
-
-                            if (idFromFile.Count != limitToDivideCsv) continue;
                             fileIncremental++;
-                            fileName = fileNamingConvention + fileIncremental;
-                            fileExtenstion = ".csv";
-                            newFileWithExtension = fileName + "_" + limitToDivideCsv.ToString().TrimEnd('0') + "K" +
-                                                   fileExtenstion;
-                            stringValue = string.Join(Environment.NewLine, idFromFile.ToArray());
-                            if (File.Exists(newFileWithExtension))
-                                File.Delete(newFileWithExtension);
-
-                            using (var sw = new StreamWriter(newFileWithExtension))
-                            {
-                                sw.WriteLine(stringValue);
-                            }
-
-                            idFromFile = new List<string> { "DataID" };
+                            CreateCsvFile(idFromFile, fileNamingConvention, fileIncremental, chunkSize);
+                            idFromFile.Clear();
                         }
                     }
                 }
 
-                fileIncremental++;
-                fileName = fileNamingConvention + fileIncremental;
-                fileExtenstion = ".csv";
-                newFileWithExtension = fileName + "_" + limitToDivideCsv.ToString().TrimEnd('0') + "K" + fileExtenstion;
-                stringValue = string.Join(Environment.NewLine, idFromFile.ToArray());
-
-                using (var sw = new StreamWriter(newFileWithExtension))
+                // Write the remaining data if any
+                if (idFromFile.Count > 0)
                 {
-                    sw.WriteLine(stringValue);
+                    fileIncremental++;
+                    CreateCsvFile(idFromFile, fileNamingConvention, fileIncremental, chunkSize);
                 }
-
-                //cleanup
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($@"Error processing CSV file: {ex.Message}");
+            }
+        }
+
+        private static void CreateCsvFile(IEnumerable<string> data, string fileNamingConvention, int fileIncremental, int chunkSize)
+        {
+            var fileName = $"{fileNamingConvention}_{fileIncremental}_{chunkSize}.csv";
+
+            try
+            {
+                using (var sw = new StreamWriter(fileName))
+                {
+                    sw.WriteLine(string.Join(Environment.NewLine, data));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($@"Error creating CSV file: {ex.Message}");
+            }
+        }
+
+        private static void CleanupExcelResources(Excel._Application xlApp, Excel._Workbook xlWorkbook, Excel.Worksheet xlWorksheet, Excel.Range xlRange)
+        {
+            // Release Excel COM objects
+            if (xlRange != null) Marshal.ReleaseComObject(xlRange);
+            if (xlWorksheet != null) Marshal.ReleaseComObject(xlWorksheet);
+            if (xlWorkbook != null)
+            {
+                xlWorkbook.Close(false);
+                Marshal.ReleaseComObject(xlWorkbook);
+            }
+            if (xlApp != null)
+            {
+                xlApp.Quit();
+                Marshal.ReleaseComObject(xlApp);
+            }
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
     }
 }
