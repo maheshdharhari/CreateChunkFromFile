@@ -1,65 +1,81 @@
-# CreateChunkFromFile
+# Report Splitter: Automate Splitting Large CSV and Excel Files Using C#
 
-![image](https://github.com/user-attachments/assets/df8c44ff-0b42-4832-902f-82e3f96aac8a)
+![image](https://github.com/user-attachments/assets/cd259d24-7a34-4b2b-93c5-727affffa265)
 
 ## Overview
 
-`CreateChunkFromFile` is a Windows Forms application that processes CSV and Excel files to extract data and divide large datasets into smaller CSV files. This tool is useful for managing and breaking down large Excel or CSV reports based on a predefined limit.
+This project demonstrates how to create a Windows Forms application in C# that automates the process of splitting large reports (in CSV or Excel format) into smaller, more manageable chunks. It uses **Microsoft Office Interop** for Excel file handling and standard file I/O for CSV file operations.
 
-## Features
+### Key Features
 
-- **File Selection**: Allows users to browse and select CSV or Excel files for processing.
-- **Data Splitting**: Splits large CSV or Excel reports into smaller chunks based on a user-defined row limit.
-- **Supports Multiple Formats**: Processes both `.csv` and `.xlsx` files.
-- **Background Processing**: Uses a background worker to handle file operations without freezing the UI.
-  
-## Prerequisites
+- **File Support**: Supports splitting both CSV and Excel (.xlsx) files.
+- **Customizable Chunk Size**: Users can define the number of rows per output file.
+- **File Naming Convention**: Automatically names the output files based on the user-specified naming convention and chunk size.
+- **Responsive UI**: Uses asynchronous file processing to keep the UI responsive during lengthy operations.
 
-- .NET Framework
-- Microsoft Excel installed (for Excel Interop)
+### Technologies Used
 
-## Dependencies
+- **C#** with .NET
+- **Windows Forms** for the user interface
+- **Microsoft Office Interop for Excel** for handling Excel files
+- **StreamReader/StreamWriter** for CSV file handling
 
-- [Microsoft.Office.Interop.Excel](https://learn.microsoft.com/en-us/office/vba/library-reference/concepts/excel-object-model)
+### Requirements
 
-## How to Use
+- **.NET Framework** (4.7.2 or above)
+- **Microsoft Office Interop Excel** (included in Microsoft Office)
 
-1. **Select a File**  
-   Click the "Browse" button to select a CSV or Excel (`.xlsx`) report file.
+### How It Works
 
-2. **Set the Chunk Size**  
-   Enter the number of rows to include in each split CSV file (e.g., `1000`).
+1. **File Selection**: The user selects either a CSV or Excel file using the file browser.
+2. **Define Chunk Size**: The user specifies how many rows should be in each output file.
+3. **Output Files**: The application splits the selected file into smaller CSV files, each containing a set number of rows.
+4. **Naming Convention**: Output files are named based on the user's chosen naming convention and the size of each chunk.
 
-3. **Start the Process**  
-   Click the "Create" button to begin processing and splitting the file. The application will run the file processing in the background to avoid freezing the user interface.
+### Getting Started
 
-4. **Check Results**  
-   After processing, the generated CSV files will be named according to the user-defined naming convention and will be saved in the same directory.
+#### 1. Clone the repository
 
-## Code Structure
+```bash
+git clone https://github.com/maheshdharhari/report-splitter.git
+cd report-splitter
+```
 
-- **MainForm.cs**: Contains the main logic for file selection, data splitting, and UI interactions.
-  
-### Key Methods:
+#### 2. Install Dependencies
 
-- **button1_Click**: Opens a file dialog to allow the user to select a report file.
-- **button3_Click**: Starts the background worker that processes the file.
-- **backgroundWorker1_DoWork**: Processes the selected file (either `.csv` or `.xlsx`) and splits it into smaller CSV files based on the user-defined limit.
+Ensure that **Microsoft Office Interop** is installed in your project. You can do this via NuGet Package Manager:
 
-### Excel Processing:
+```bash
+Install-Package Microsoft.Office.Interop.Excel
+```
 
-- The application uses Excel Interop to read Excel files (`.xlsx`).
-- After processing, COM objects are released to ensure no Excel process remains running in the background.
+#### 3. Build and Run
 
-## Example Usage
+Open the solution in Visual Studio, build the project, and run the application. You can now browse for files, define chunk sizes, and automatically split reports.
 
-1. Click "Browse" to select a report file (`.csv` or `.xlsx`).
-2. Set the Chunk Size, e.g., `1000`.
-3. Click "Create" to process and split the file.
-4. The program will output multiple CSV files, each containing the specified number of rows.
+### Usage
 
-## Cleanup
+1. **Browse for File**: Click the "Browse" button to select the report file.
+2. **Define Chunk Size**: Enter the number of rows you want per chunk.
+3. **Specify Naming Convention**: Enter a custom name for the output files.
+4. **Start Process**: Click "Create" to begin splitting the report into smaller files.
 
-The code uses garbage collection and releases COM objects after processing Excel files to prevent memory leaks or background Excel processes.
+### File Structure
 
-For any questions or suggestions, feel free to reach out!
+```bash
+ReportSplitter/
+├── SearchFromReport/
+│   ├── MainForm.cs        # The core logic for file handling and UI
+│   ├── Program.cs         # Entry point for the application
+│   ├── App.config         # Configuration for the application
+│   └── ...                # Other files like Form designer and resources
+└── README.md              # This file
+```
+
+### Contributing
+
+Feel free to open issues or contribute by submitting pull requests. Any feedback or ideas to improve the functionality are welcome!
+
+### License
+
+This project is licensed under the MIT License.
