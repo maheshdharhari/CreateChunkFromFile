@@ -64,7 +64,7 @@ Open the solution in Visual Studio, build the project, and run the application. 
 
 ```bash
 report-splitter/
-├── SearchFromReport/
+├── report-splitter/
 │   ├── MainForm.cs        # The core logic for file handling and UI
 │   ├── Program.cs         # Entry point for the application
 │   ├── App.config         # Configuration for the application
