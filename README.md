@@ -63,7 +63,7 @@ Open the solution in Visual Studio, build the project, and run the application. 
 ### File Structure
 
 ```bash
-ReportSplitter/
+report-splitter/
 ├── SearchFromReport/
 │   ├── MainForm.cs        # The core logic for file handling and UI
 │   ├── Program.cs         # Entry point for the application
