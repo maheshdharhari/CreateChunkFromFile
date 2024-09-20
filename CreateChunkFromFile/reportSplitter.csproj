@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{91B21B27-04D9-4057-B061-3916D5408289}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>SearchFromReport</RootNamespace>
-    <AssemblyName>SearchFromReport</AssemblyName>
+    <RootNamespace>reportSplitter</RootNamespace>
+    <AssemblyName>reportSplitter</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -73,6 +73,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -121,7 +121,7 @@
             this.Controls.Add(this.labelFilePath);
             this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "Create Chunk";
+            this.Text = "Report Splitter";
             this.ResumeLayout(false);
             this.PerformLayout();
 
